@@ -1,0 +1,60 @@
+name: ZyVOP Publish
+description: Publish changed Markdown articles to ZyVOP and configured syndication destinations.
+author: ZyVOP
+
+branding:
+  icon: upload-cloud
+  color: blue
+
+inputs:
+  posts:
+    description: Git pathspec selecting the Markdown articles to publish.
+    required: false
+    default: ":(glob)posts/**/*.md"
+  changed-only:
+    description: Publish only files changed by the current push when history is available.
+    required: false
+    default: "true"
+  local:
+    description: Send provider credentials directly from the runner instead of using ZyVOP-managed integrations.
+    required: false
+    default: "false"
+  dry-run:
+    description: Validate selected articles without publishing them.
+    required: false
+    default: "false"
+  endpoint:
+    description: Optional custom ZyVOP GraphQL endpoint.
+    required: false
+    default: ""
+  cli-version:
+    description: Exact published version of the zyvop npm CLI to execute.
+    required: false
+    default: "1.1.1"
+
+outputs:
+  published-count:
+    description: Number of Markdown files successfully processed.
+    value: ${{ steps.publish.outputs.published-count }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Publish Markdown articles
+      id: publish
+      shell: bash
+      env:
+        INPUT_POSTS: ${{ inputs.posts }}
+        INPUT_CHANGED_ONLY: ${{ inputs.changed-only }}
+        INPUT_LOCAL: ${{ inputs.local }}
+        INPUT_DRY_RUN: ${{ inputs.dry-run }}
+        INPUT_ENDPOINT: ${{ inputs.endpoint }}
+        INPUT_CLI_VERSION: ${{ inputs.cli-version }}
+        BEFORE_SHA: ${{ github.event.before }}
+        AFTER_SHA: ${{ github.sha }}
+      run: "${{ github.action_path }}/scripts/publish.sh"

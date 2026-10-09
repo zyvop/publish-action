@@ -1,5 +1,7 @@
 # ZyVOP Publish Action
 
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-ZyVOP%20Publish-blue?logo=github&logoColor=white)](https://github.com/marketplace/actions/zyvop-publish)
+
 Publish Markdown articles to [ZyVOP](https://zyvop.com) and optionally syndicate
 them to the destinations selected in each article's frontmatter.
 

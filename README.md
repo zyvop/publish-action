@@ -2,36 +2,78 @@
 
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-ZyVOP%20Publish-blue?logo=github&logoColor=white)](https://github.com/marketplace/actions/zyvop-publish)
 
-Publish Markdown articles to [ZyVOP](https://zyvop.com) and optionally syndicate
-them to the destinations selected in each article's frontmatter.
+Publish Markdown posts from your repository to [ZyVOP](https://zyvop.com) on
+every push, and cross-post them to Dev.to, Hashnode, Medium, WordPress and
+Bluesky. Each article chooses its destinations in its own frontmatter.
 
-## Usage
+Core publishing and syndication are free. See [pricing](https://zyvop.com/pricing).
 
-```yaml
-name: Publish with ZyVOP
+## Quick start
 
-on:
-  push:
-    branches: [main]
-    paths:
-      - "posts/**/*.md"
-  workflow_dispatch:
+1. Create a ZyVOP developer token (see the [docs](https://docs.zyvop.com)) and
+   save it as a repository secret named `ZYVOP_TOKEN`.
+2. Connect the destinations you want in ZyVOP under Settings > Integrations,
+   or use [direct provider mode](#direct-provider-mode) to keep those
+   credentials in GitHub Actions instead.
+3. Add a Markdown file under `posts/`:
 
-permissions:
-  contents: read
+   ```markdown
+   ---
+   title: My first post
+   canonical_url: https://example.com/my-first-post
+   cross_post:
+     devto: true
+     hashnode: true
+   ---
 
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+   Post body in Markdown.
+   ```
 
-      - uses: zyvop/publish-action@v1
-        env:
-          ZYVOP_TOKEN: ${{ secrets.ZYVOP_TOKEN }}
+4. Add `.github/workflows/publish.yml`:
+
+   ```yaml
+   name: Publish with ZyVOP
+
+   on:
+     push:
+       branches: [main]
+       paths:
+         - "posts/**/*.md"
+     workflow_dispatch:
+
+   permissions:
+     contents: read
+
+   jobs:
+     publish:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v4
+           with:
+             fetch-depth: 0
+
+         - uses: zyvop/publish-action@v1
+           env:
+             ZYVOP_TOKEN: ${{ secrets.ZYVOP_TOKEN }}
+   ```
+
+5. Push to `main`. The action publishes the Markdown files changed in that push.
+
+To check a setup without publishing anything, set `dry-run: "true"`. A dry run
+does not need `ZYVOP_TOKEN`.
+
+Example output (abridged):
+
+```text
+Publishing posts/my-first-post.md with zyvop@1.1.1...
+Article published successfully!
+ZyVOP Live URL:  https://zyvop.com/...
+Action:          Created new article
+dev.to           Live (https://dev.to/...)
+Hashnode         Live (https://...)
 ```
+
+## How it works
 
 The action publishes only Markdown files changed by a push. On a manual run,
 first push, or unavailable base commit, it safely processes all tracked files
@@ -39,6 +81,13 @@ matching `posts`.
 
 Give every article a stable `canonical_url`, `zyvop_id`, or `slug` so future
 runs update the existing article rather than creating another one.
+
+The canonical URL is set on Dev.to, Hashnode and supported Medium flows.
+WordPress copies get an "Originally published at" line that links to the
+source. Bluesky receives a link post.
+
+Medium's API cannot update a published story, so republishing an article to
+Medium in direct provider mode can create another story there.
 
 ## Inputs
 
@@ -72,12 +121,10 @@ using integrations connected in ZyVOP:
 Add only the provider secrets selected by your articles. Supported variables
 are documented in the [ZyVOP CLI repository](https://github.com/zyvop/zyvop-cli).
 
-## Release checklist
+## Run your publication on your own domain
 
-1. Create a public GitHub repository named `zyvop/publish-action`.
-2. Push this repository and tag the first release, for example `v1.0.0`.
-3. Publish the release to GitHub Marketplace.
-4. Create or update the moving `v1` tag after each compatible release.
+Founding Pro adds a custom domain with automatic SSL, standalone publication
+mode, and removable ZyVOP branding. See [plans and pricing](https://zyvop.com/pricing).
 
 ## License
 

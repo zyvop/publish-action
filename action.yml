@@ -1,5 +1,5 @@
 name: ZyVOP Publish
-description: Publish changed Markdown articles to ZyVOP and configured syndication destinations.
+description: Publish changed Markdown posts to ZyVOP and cross-post to Dev.to, Hashnode, Medium, WordPress and Bluesky.
 author: ZyVOP
 
 branding:
